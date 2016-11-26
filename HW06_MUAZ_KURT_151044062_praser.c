@@ -15,9 +15,12 @@ char *readingFile(
                   FILE* data,
                   char *fullreadenfile)
 {
-    int counter, isEof=0;
+    int counter;
     char q;
-    for(counter = 0; fscanf(data, "%c", &q)!=EOF && counter < posibleChar - 1; ++counter)
+    for(counter = 0;
+            fscanf(data, "%c", &q)!= EOF &&
+            counter < posibleChar - 1;
+                ++counter)
         fullreadenfile[counter] = q;
     fullreadenfile[counter] = 0;
     return fullreadenfile;
@@ -25,7 +28,7 @@ char *readingFile(
 
 /*
     I am searching for a keyword inside a string,
-    fullreadenfile is the searchen string,
+    fullreadenfile is the searched string,
     start is the keyword.
     If I find keyword, then i update the string with after keyword
     and return it.
@@ -42,15 +45,19 @@ char *whatsAfterThis(
             return strcpy(fullreadenfile,
                           &fullreadenfile[counter + strlen(start)]);
     }
-    return "NULL";
+    return "Empty";
 }
 
 /*
     I am searching for a keyword in a string.
-    If i find the keyword
+    fullreadenfile is the searched string.
+    If i find the keyword, then i return the string before the keyword.
+    I am not update the given string because it possibly cause data loss.
+    If i cant find the keyword in given string,
+    Then i return Empty as there is no keyword.
 */
 char *whatsBeforeThis(
-                      char *fullreadenfile,
+                      const char *fullreadenfile,
                       char *finish)
 {
     int counter;
@@ -64,9 +71,17 @@ char *whatsBeforeThis(
                            fullreadenfile,
                            counter);
     }
-    return "NULL";
+    return "Empty";
 }
 
+/*
+    I am searching for 2 keywords in a string.
+    fullreadenfile is the searched string.
+    I'm finding the string between first keyword and sec keyword.
+    I'm searching with early defined functions "whatsAfterThis" and "whatsBeforeThis".
+    I return the string between them.
+    If there will be some errors, then return value will be NULL.
+*/
 char *whatsBetweenThese(
                         char *fullreadenfile,
                         char *start,
@@ -74,20 +89,36 @@ char *whatsBetweenThese(
 {
     char textintags[posibleChar];
     return strcpy(textintags,
-                  (whatsBeforeThis(strcpy(textintags,
+                  whatsBeforeThis(strcpy(textintags,
                                           whatsAfterThis(fullreadenfile,
                                                          start)),
-                                          finish)));
+                                          finish));
 }
 
-void categorisingMailsintoStrings(FILE *openedmail,
-                                  char subject[maxMailcanbeReaden][mssSubject],
-                                  char body[maxMailcanbeReaden][mssBody])
+void parsingMail(FILE *openedmail,
+                 char subject[maxMailcanbeReaden][mssSubject],
+                 char body[maxMailcanbeReaden][mssBody])
 {
     int counter;
-
-
-
+    char theFile[posibleChar];
+    readingFile(openedmail,theFile);
+    for(counter = 0;
+            whatsBetweenThese(theFile,
+                          "<email>",
+                          "</email>") != "Empty" &&
+            counter < maxMailcanbeReaden;
+                ++counter);
+    {
+        strcpy(subject[counter],
+               whatsBetweenThese(theFile,
+                                 "<Subject>",
+                                 "</Subject>"));
+        strcpy(body[counter],
+               whatsBetweenThese(theFile,
+                                 "<Body>",
+                                 "</Body>"));
+    }
+    return;
 }
 
 
@@ -96,12 +127,11 @@ void main()
 {
     FILE *emails;
     char subject[maxMailcanbeReaden][mssSubject],
-        body[maxMailcanbeReaden][mssBody],
-        theFile[posibleChar];
+        body[maxMailcanbeReaden][mssBody];
     emails=fopen("emails.txt", "r");
-    printf("%s\n\n\n", readingFile(emails,theFile));
-    printf("%s\n\n\n", whatsAfterThis(theFile,"<email>"));
-    printf("%s\n\n\n", whatsBeforeThis(theFile,"</email>"));
-    printf("%s\n\n\n", whatsBetweenThese(theFile,"<email>","</email>"));
+    parsingMail(emails, subject, body);
+    printf("%s\n\n\n", subject[0]);
+    printf("%s\n\n\n", body[0]);
+    fclose(emails);
     return;
 }
