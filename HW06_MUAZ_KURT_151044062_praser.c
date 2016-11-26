@@ -1,55 +1,93 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #define posibleChar 10000
 #define maxMailcanbeReaden 20
 #define mssSubject 200
 #define mssBody 2000
-void findingMails(char *fullreadenfile,
-                  char mail[maxMailcanbeReaden][mssSubject + mssBody + 80])
+
+/*
+    I can only read posibleChar characters from a file.
+    If the file finish before posibleChar,
+    then my job ends.
+*/
+char *readingFile(
+                  FILE* data,
+                  char *fullreadenfile)
 {
-    int i, mailScout;
-    char start[] = "<email>";
-    for(mailScout = 0; mailScout < maxMailcanbeReaden;++mailScout);
-        for(i = 0; i < strlen( strtok( fullreadenfile, "</email>" )); ++i)
-        {
-            if(strcmp(&fullreadenfile[i], start) == 0)
-                strcpy(mail[mailScout],&fullreadenfile[i + 7]);
-        }
+    int counter, isEof=0;
+    char q;
+    for(counter = 0; fscanf(data, "%c", &q)!=EOF && counter < posibleChar - 1; ++counter)
+        fullreadenfile[counter] = q;
+    fullreadenfile[counter] = 0;
+    return fullreadenfile;
 }
 
+/*
+    I am searching for a keyword inside a string,
+    fullreadenfile is the searchen string,
+    start is the keyword.
+    If I find keyword, then i update the string with after keyword
+    and return it.
+    If there is no keyword, then I return NULL for saying there will not be keyword.
+*/
+char *whatsAfterThis(
+                     char *fullreadenfile,
+                     char *start)
+{
+    int counter;
+    for(counter = 0; counter < strlen(fullreadenfile); ++counter)
+    {
+        if(strncmp(&fullreadenfile[counter], start, strlen(start)) == 0)
+            return strcpy(fullreadenfile,
+                          &fullreadenfile[counter + strlen(start)]);
+    }
+    return "NULL";
+}
 
+/*
+    I am searching for a keyword in a string.
+    If i find the keyword
+*/
+char *whatsBeforeThis(
+                      char *fullreadenfile,
+                      char *finish)
+{
+    int counter;
+    char beforeString[posibleChar];
+    for(counter = 0; counter < strlen(fullreadenfile); ++counter)
+    {
+        if(strncmp(&fullreadenfile[counter],
+                   finish,
+                   strlen(finish)) == 0)
+            return strncpy(beforeString,
+                           fullreadenfile,
+                           counter);
+    }
+    return "NULL";
+}
+
+char *whatsBetweenThese(
+                        char *fullreadenfile,
+                        char *start,
+                        char *finish)
+{
+    char textintags[posibleChar];
+    return strcpy(textintags,
+                  (whatsBeforeThis(strcpy(textintags,
+                                          whatsAfterThis(fullreadenfile,
+                                                         start)),
+                                          finish)));
+}
 
 void categorisingMailsintoStrings(FILE *openedmail,
                                   char subject[maxMailcanbeReaden][mssSubject],
                                   char body[maxMailcanbeReaden][mssBody])
 {
-    char theFile[posibleChar];
+    int counter;
 
-    int readerofAll,
-        mailsReaden;
 
-    for(readerofAll=0;
-        theFile[readerofAll] == EOF &&
-        readerofAll < posibleChar - 1;
-        ++readerofAll)
-    {
-        fscanf(openedmail, "%c", &theFile[readerofAll]);
-    }
-    theFile[readerofAll + 1] = '\0';
 
-    strtok(theFile, "<email>");
-    for(mailsReaden = 0;
-        strlen(NULL) > 7,
-        mailsReaden < maxMailcanbeReaden;
-        ++mailsReaden)
-    {
-        strtok(NULL, "<Subject>");
-        strcpy(subject[mailsReaden], strtok(NULL, "</Subject>"));
-        strtok(NULL, "<Body>");
-        strcpy(body[mailsReaden], strtok(NULL, "</Body>"));
-        strtok(NULL, "</email>");
-        strtok(NULL, "<email>");
-    }
 }
 
 
@@ -58,8 +96,12 @@ void main()
 {
     FILE *emails;
     char subject[maxMailcanbeReaden][mssSubject],
-        body[maxMailcanbeReaden][mssBody];
+        body[maxMailcanbeReaden][mssBody],
+        theFile[posibleChar];
     emails=fopen("emails.txt", "r");
-    categorisingMailsintoStrings(emails,subject,body);
+    printf("%s\n\n\n", readingFile(emails,theFile));
+    printf("%s\n\n\n", whatsAfterThis(theFile,"<email>"));
+    printf("%s\n\n\n", whatsBeforeThis(theFile,"</email>"));
+    printf("%s\n\n\n", whatsBetweenThese(theFile,"<email>","</email>"));
     return;
 }
