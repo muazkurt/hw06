@@ -56,20 +56,21 @@ char *whatsAfterThis(
     If i cant find the keyword in given string,
     Then i return Empty as there is no keyword.
 */
+//i think there must be a update.
 char *whatsBeforeThis(
-                      const char *fullreadenfile,
-                      char *finish)
+                      char *fullreadenfile,
+                      char *finish,
+					  char *whatsBefore)
 {
     int counter;
-    char beforeString[posibleChar];
     for(counter = 0; counter < strlen(fullreadenfile); ++counter)
     {
-        if(strncmp(&fullreadenfile[counter],
-                   finish,
-                   strlen(finish)) == 0)
-            return strncpy(beforeString,
-                           fullreadenfile,
-                           counter);
+		if (strncmp(&fullreadenfile[counter],
+			finish,
+			strlen(finish)) == 0)
+			return strncpy(whatsBefore,
+				fullreadenfile,
+				counter);
     }
     return "Empty";
 }
@@ -85,14 +86,14 @@ char *whatsBeforeThis(
 char *whatsBetweenThese(
                         char *fullreadenfile,
                         char *start,
-                        char *finish)
+                        char *finish,
+						char *placetoPut)
 {
-    char textintags[posibleChar];
-    return strcpy(textintags,
-                  whatsBeforeThis(strcpy(textintags,
+    return strcpy(placetoPut,
+                  whatsBeforeThis(strcpy(placetoPut,
                                           whatsAfterThis(fullreadenfile,
                                                          start)),
-                                          finish));
+                                          finish,placetoPut));
 }
 
 void parsingMail(FILE *openedmail,
@@ -100,23 +101,21 @@ void parsingMail(FILE *openedmail,
                  char body[maxMailcanbeReaden][mssBody])
 {
     int counter;
-    char theFile[posibleChar];
+    char theFile[posibleChar], mailweworkon[posibleChar];
     readingFile(openedmail,theFile);
-    for(counter = 0;
-            whatsBetweenThese(theFile,
-                          "<email>",
-                          "</email>") != "Empty" &&
-            counter < maxMailcanbeReaden;
-                ++counter);
+	for (counter = 0;
+					whatsBetweenThese(theFile,
+									"<email>",
+									"</email>",mailweworkon) != "Empty" &&
+									counter < maxMailcanbeReaden;
+									++counter)
     {
-        strcpy(subject[counter],
-               whatsBetweenThese(theFile,
+               whatsBetweenThese(mailweworkon,
                                  "<Subject>",
-                                 "</Subject>"));
-        strcpy(body[counter],
-               whatsBetweenThese(theFile,
+                                 "</Subject>",subject[counter]);
+               whatsBetweenThese(mailweworkon,
                                  "<Body>",
-                                 "</Body>"));
+                                 "</Body>",body[counter]);
     }
     return;
 }
@@ -131,7 +130,7 @@ void main()
     emails=fopen("emails.txt", "r");
     parsingMail(emails, subject, body);
     printf("%s\n\n\n", subject[0]);
-    printf("%s\n\n\n", body[0]);
+  //  printf("%s\n\n\n", body[0]);
     fclose(emails);
     return;
 }

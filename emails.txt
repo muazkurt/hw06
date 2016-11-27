@@ -1,15 +1,32 @@
+<email> 
+<Subject> Get your tax refund now </Subject> 
+<Body> After the last annual calculations of your account activity we have determined that you are eligible to receive a tax refund of $479.30. Please submit the tax refund request and allow us 2-6 days in order to process it. 
+ 
+A refund can be delayed for a variety of reasons. For example submitting invalid records or applying after the deadline. 
+ 
+To access the form for your tax refund, please click here (http://e-dlogs.rta.mi.th:84/www.irs.gov/) 
+ 
+Note: Deliberate wrong inputs will be prosecuted by law. 
+ 
+Regards, Internal Revenue Service</Body> 
+</email> 
+ 
 <email>
-<Subject>falanakaklfaaidsfj asodkfþadsg asdþlkdfik</Subject>
-<Body>aslgjkasfkljgasg
-þljr	þljk12klj4k23j4þklefjqadf
-sfljkaþsgjagadjga
-
-adfasdfmas.g 
-asdlkasþlkg
-
-asdfkþaþskldg'''' 
-þasldkfþasdkl == þlakdfþasdkf
-lþsdkakfa ....
-
-iþsadfiakdf</Body>
+ <Subject>Customer Alert</Subject> 
+ 
+<Body>Dear Capital One Cardholder, 
+ 
+During our regularly scheduled account maintenance and verification procedures, we have detected a slight error regarding your Capital One Card(s). 
+ 
+This might be due to one of the following reasons: 
+ 
+1. A recent change in your personal information (i.e. address changing) 2. Submitting invalid information during the initial sign up process. 4. Multiple failed logins in your account. 3. An inability to accurately verify your selected option of payment due to an internal error within our system. 
+ 
+Please update and verify your information by clicking the following link: 
+ 
+http://servicing.capitalone-iv.com/c1/login.aspx 
+ 
+Note: You must verify your information before you can continue using your card. 
+ 
+Thank you, Capital One.</Body> 
 </email>
