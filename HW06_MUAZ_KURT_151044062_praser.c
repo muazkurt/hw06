@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #define posibleChar	 4096	//Max readable chars from file.
-#define mssEmail	16			//MeSage String for Email.
+#define mssEmail 16			//MeSage String for Email.
 #define mssSubject 32		//MeSage String for Subject.
 #define mssBody 1024		//MeSage String for Body.
 #define mpSubject 15		//Maximum Printable Subject
@@ -23,6 +23,7 @@ char *readingFile(FILE* data, char *fullreadenfile)
     return fullreadenfile;
 }
 
+/*well working reading mail functions start*/
 /*
     I am searching for a keyword inside a string,
     fullreadenfile is the searched string,
@@ -105,19 +106,132 @@ void parsingMail(FILE *openedmail, char subject[mssEmail][mssSubject], char body
 		}
 	return;
 }
+/*well working reading mails functions*/
 
 
 
+
+
+/*well working printing functions start
+
+these functions works very well. But their job is only printing '-', ' ' or printing some defined thing.
+ I couldnt use them for printing expecting style.
+*/
+void fillthelane()
+{
+	int i;
+	for (i = (mpBody + mpSubject +13); i > 0; --i)
+		printf("-");
+	printf("\n");
+	return;
+}
+
+void witchmail(int square)
+{
+	if (square > 0)
+		printf("|%4d |", square);
+	else if (square == 0)
+		printf("|%4c |", '#');
+	else if (square == -1)
+		printf("|%4c |", ' ');
+	return;
+}
+
+void subjectonTop()
+{
+	int counter;
+		printf("    subject    |");
+	return;
+}
+
+void bodyonTop()
+{
+	int i;
+	for (i = 0; i < 23; ++i)
+		printf(" ");
+	printf("body");
+	for (i = 0; i < 27; ++i)
+		printf(" ");
+	printf("|\n");
+	return;
+}
+/*well working printing functions end*/
+
+
+/*
+these are for using upper function tools and printing expected style.
+	there is some lessnes on them. I think my algoriythm is ok but couldn't impliment them
+	Thats why I cant print them like expected.
+*/
+void subjectinside(char subject[mpSubject])
+{
+	int i;
+	char filler[mpSubject];
+	if (strlen(subject) != 0)
+	{
+
+		printf("%s ", strtok(subject," "));
+		for (i = 1; i < 3; ++i)
+		{
+			printf("%s ", strtok(NULL, " "));
+		}
+		if (strlen(subject) < mpSubject)
+			for (i = 0; i < (mpSubject - strlen(subject)); ++i)
+				printf("%c", ' ');
+		printf("%c", '|');
+	}
+	else
+		printf("%15c|", ' ');
+	return;
+}
+
+void bodyinside(char body[mpBody])
+{
+	printf("%s|\n", body);
+	return;
+}
+
+void specialMailPrint(char subject[mssEmail][mssSubject], char body[mssEmail][mssBody])
+{
+	int counter, sub, bdy;
+	char fillerS[mpSubject+1], fillerB[mpBody+1];
+	fillthelane();
+	witchmail(0);
+	subjectonTop();	
+	bodyonTop();
+	fillthelane();
+	for (counter = 0; strcmp(subject[counter], "Empty") != 0 && counter < mssEmail; ++counter)
+	{
+		witchmail(counter + 1);
+		for (sub = 0; strlen(subject[counter]) > mpSubject && strlen(body[counter]) > mpBody && sub<3; ++sub)
+		{
+			if (sub == 0)
+			{
+				subjectinside(strncpy(fillerS, subject[counter], mpSubject));
+				bodyinside(strncpy(fillerB, body[counter], mpBody));
+			}
+			else
+			{
+				witchmail(-1);
+				subjectinside(strncpy(fillerS, &subject[counter][sub*mpSubject], mpSubject));
+				bodyinside(strncpy(fillerB, &body[counter][sub*mpBody], mpBody-1));
+			}
+		}
+		
+	}
+
+	return;
+}
+/*wrong functions end*/
 
 
 void main()
 {
-    FILE *emails;
+    FILE* emails;
 	char subject[mssEmail][mssSubject], body[mssEmail][mssBody];
     emails=fopen("emails.txt", "r");
     parsingMail(emails, subject, body);	
-	printf(".......%s....\n\n", subject[0]);
-	printf(".......%s....\n", body[0]);
+	specialMailPrint(subject, body);
     fclose(emails);
     return;
 }
