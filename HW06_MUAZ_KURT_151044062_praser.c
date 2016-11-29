@@ -24,8 +24,9 @@ char *readingFile(FILE* data, char *fullreadenfile)
 }
 
 /*
-I am searching for dest in source
-If i find in it, ill return 1i else ill return 0;
+	I am searching for dest in source
+	If i find in it, i return 1.
+	else i return 0;
 */
 int searchinside(char *dest, char *source)
 {
@@ -38,6 +39,19 @@ int searchinside(char *dest, char *source)
 	return 0;
 }
 
+/*
+	finds the dest string's position in source file.
+*/
+int searchtheposition(char *dest, char *source)
+{
+	int counter;
+	for (counter = 0; counter <= strlen(source); ++counter)
+	{
+		if (strncmp(dest, &source[counter], strlen(dest)) == 0)
+			return counter;
+	}
+	return -1;
+}
 
 /*
 I take a file and i look up it.
@@ -79,7 +93,32 @@ int detectErrorsforEmail(FILE *mailfile)
 	return -1;
 }
 
-
+/*
+	detecting errors on token file
+*/
+int detectingErrorsforToken(FILE *tokenfile)
+{
+	char token[60], *ef;
+	int i, error = 0, sign, value = 0, positive;
+	for (i = 0; error == 0; ++i)
+	{
+		ef = fgets(token, 60, tokenfile);
+		sign = searchinside("=", token);
+		if (sign == -1)
+			++error;
+		else
+		{
+			positive = sscanf(&token[searchtheposition("=", token) + 1], "%d", &value);
+			if (positive != 1)
+				++error;
+		}
+		if (ef == NULL)
+			--error;
+	}
+	if (error > 0)
+		return i;
+	return -1;
+}
 
 /*well working reading mail functions start*/
 /*
@@ -103,7 +142,7 @@ char *whatsAfterThis(char *fullreadenfile, char *start)
 				return strcpy(fullreadenfile, &fullreadenfile[counter + strlen(start)- 1]);
 		}
 	}
-    return "Empty";
+    return "ERROR";
 }
 
 /*
@@ -112,7 +151,7 @@ char *whatsAfterThis(char *fullreadenfile, char *start)
     If i find the keyword, then i return the string before the keyword.
     I am not update the given string because it possibly cause data loss.
     If i cant find the keyword in given string,
-    Then i return Empty as there is no keyword.
+    Then i return ERROR as there is no keyword.
 */
 char *whatsBeforeThis(char *fullreadenfile, char *finish, char *whatsBefore)
 {
@@ -122,7 +161,7 @@ char *whatsBeforeThis(char *fullreadenfile, char *finish, char *whatsBefore)
 		if (strncmp(&fullreadenfile[counter], finish, strlen(finish)) == 0)
 			return strncpy(whatsBefore, fullreadenfile, counter);
 	}
-    return "Empty";
+    return "ERROR";
 }
 
 /*
@@ -131,7 +170,7 @@ char *whatsBeforeThis(char *fullreadenfile, char *finish, char *whatsBefore)
     I'm finding the string between first keyword and sec keyword.
     I'm searching with early defined functions "whatsAfterThis" and "whatsBeforeThis".
     I return the string between them.
-    If there will be some errors, then return value will be Empty.
+    If there will be some errors, then return value will be ERROR.
 */
 char *whatsBetweenThese(char *fullreadenfile, char *start, char *finish, char *placetoPut)
 {
@@ -155,7 +194,7 @@ void parsingMail(FILE *openedmail, char subject[mssEmail][mssSubject], char body
 	char theFile[posibleChar] = "\0", mailweworkon[posibleChar] = "\0";
 	readingFile(openedmail, theFile);
 	for (counter = 0;
-		whatsBetweenThese(theFile, "<email>", "</email>", mailweworkon) != "Empty" &&
+		searchinside("ERROR", whatsBetweenThese(theFile, "<email>", "</email>", mailweworkon)) == 0 &&
 		counter < mssEmail;
 		++counter)
 		{
@@ -170,8 +209,8 @@ void parsingMail(FILE *openedmail, char subject[mssEmail][mssSubject], char body
 
 
 
-/*well working printing functions start
-
+/*well working printing functions start*/
+/*
 these functions works very well. But their job is only printing '-', ' ' or printing some defined thing.
  I couldnt use them for printing expecting style.
 */
@@ -217,7 +256,7 @@ void bodyonTop()
 
 
 /*
-these are for using upper function tools and printing expected style.
+	these are for using upper function tools and printing expected style.
 	there is some lessnes on them. I think my algoriythm is ok but couldn't impliment them
 	Thats why I cant print them like expected.
 */
@@ -258,7 +297,7 @@ void specialMailPrint(char subject[mssEmail][mssSubject], char body[mssEmail][ms
 	subjectonTop();	
 	bodyonTop();
 	fillthelane();
-	for (counter = 0; strcmp(subject[counter], "Empty") != 0 && counter < mssEmail; ++counter)
+	for (counter = 0; searchinside("ERROR", subject[counter]) == 0 && counter < mssEmail; ++counter)
 	{
 		witchmail(counter + 1);
 		for (sub = 0; strlen(subject[counter]) > mpSubject && strlen(body[counter]) > mpBody && sub<3; ++sub)
@@ -277,7 +316,7 @@ void specialMailPrint(char subject[mssEmail][mssSubject], char body[mssEmail][ms
 		}
 		
 	}
-
+	printf("\n");
 	return;
 }
 /*wrong functions end*/
@@ -285,11 +324,24 @@ void specialMailPrint(char subject[mssEmail][mssSubject], char body[mssEmail][ms
 
 void main()
 {
-    FILE* emails;
+    FILE* emails, *token;
 	char subject[mssEmail][mssSubject], body[mssEmail][mssBody];
-    emails=fopen("emails.txt", "r");
-    parsingMail(emails, subject, body);	
-	specialMailPrint(subject, body);
+	int error;
+	emails=fopen("emails.txt", "r");
+	error = detectErrorsforEmail(emails);
+	if (error == -1)
+		;
+	else if (error > 0)
+		printf("mail error in %d line\n", error);
+	parsingMail(emails, subject, body);	
+	//specialMailPrint(subject, body);
     fclose(emails);
+	token = fopen("token.txt", "r");
+	error = detectingErrorsforToken(token);
+	if (error == -1)
+		;
+	else if (error > 0)
+		printf("mail error in %d line\n", error);
+	fclose(token);
     return;
 }
